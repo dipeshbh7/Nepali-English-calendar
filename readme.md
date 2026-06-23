@@ -1,8 +1,6 @@
 # Nepali (BS) to English (AD) Date Converter
 
-A simple, single-file web tool to convert Bikram Sambat (BS) dates to Gregorian (AD) dates. 
-
-No build steps, no frameworks, no dependencies. Just one HTML file.
+A simple web tool to convert Bikram Sambat (BS) dates to Gregorian (AD) dates. It is built with plain HTML, CSS, and vanilla JavaScript, so there are no dependencies or build steps.
 
 ## Features
 
@@ -37,10 +35,13 @@ The script uses a reference date of **BS 2000/01/01 = AD 1943/04/14**. When you 
 - **Year Range**: Only supports BS 2000 to 2090. 
 - **Hardcoded Data**: The calendar data array in the JS needs to be manually updated if you want to support years beyond 2090.
 
+
 ## Project Structure
 
 ```text
 .
-├── index.html   # Contains all the HTML, CSS, and JS
+├── index.html   # Page layout and structure
+├── style.css    # Styling and layout
+├── app.js       # Conversion logic and calendar data
 └── README.md    # This file
 ```
