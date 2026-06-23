@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepali to English Date Converter</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --blue-primary: #1e40af;
+    --blue-dark: #1e3a8a;
+    --blue-light: #dbeafe;
+    --blue-soft: #eff6ff;
+    --red-primary: #dc2626;
+    --red-dark: #b91c1c;
+    --red-light: #fee2e2;
+    --red-soft: #fef2f2;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, var(--blue-soft) 0%, var(--red-soft) 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 520px;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(30, 64, 175, 0.1), 0 4px 12px rgba(220, 38, 38, 0.05);
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-dark) 100%);
+    padding: 32px 32px 28px;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(220, 38, 38, 0.15);
+    border-radius: 50%;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -60%;
+    left: -10%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header p {
+    font-size: 14px;
+    opacity: 0.85;
+    position: relative;
+    z-index: 1;
+  }
+
+  .accent-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--red-primary) 0%, var(--blue-primary) 100%);
+  }
+
+  .content {
+    padding: 32px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .input-field {
+    position: relative;
+  }
+
+  .input-field input,
+  .input-field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: var(--white);
+    transition: all 0.2s ease;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .input-field select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231e40af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .input-field input:focus,
+  .input-field select:focus {
+    border-color: var(--blue-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  }
+
+  .input-field input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .btn-convert {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--red-primary) 0%, var(--red-dark) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  .btn-convert:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+  }
+
+  .btn-convert:active {
+    transform: translateY(0);
+  }
+
+  .result {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--blue-soft);
+    border-left: 4px solid var(--blue-primary);
+    border-radius: 8px;
+    display: none;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .result.show {
+    display: block;
+  }
+
+  .result.error {
+    background: var(--red-soft);
+    border-left-color: var(--red-primary);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .result.error .result-label {
+    color: var(--red-primary);
+  }
+
+  .result-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .result-day {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .footer {
+    padding: 16px 32px;
+    background: #f9fafb;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .footer span {
+    color: var(--red-primary);
+  }
+
+  @media (max-width: 480px) {
+    .content { padding: 24px; }
+    .header { padding: 24px; }
+    .header h1 { font-size: 20px; }
+    .input-row { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📅 Date Converter</h1>
+      <p>Nepali (Bikram Sambat) → English (Gregorian)</p>
+    </div>
+    <div class="accent-bar"></div>
+
+    <div class="content">
+      <div class="input-group">
+        <label>Nepali Date (BS)</label>
+        <div class="input-row">
+          <div class="input-field">
+            <select id="bsYear"></select>
+          </div>
+          <div class="input-field">
+            <select id="bsMonth"></select>
+          </div>
+          <div class="input-field">
+            <select id="bsDay"></select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-convert" id="convertBtn">Convert to English</button>
+
+      <div class="result" id="result">
+        <div class="result-label" id="resultLabel">English Date</div>
+        <div class="result-value" id="resultValue">—</div>
+        <div class="result-day" id="resultDay"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Nepali months
+  const nepaliMonths = [
+    'Baishakh', 'Jestha', 'Ashadh', 'Shrawan',
+    'Bhadra', 'Ashwin', 'Kartik', 'Mangsir',
+    'Poush', 'Magh', 'Falgun', 'Chaitra'
+  ];
+
+  const englishMonths = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // BS calendar data: days in each month for each year (BS 2000 - 2090)
+  // Reference: standard Nepali calendar data
+  const bsCalendarData = {
+    2000: [30,32,31,32,31,30,30,30,29,30,29,31],
+    2001: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2002: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2003: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2004: [30,32,31,32,31,30,30,30,29,30,29,31],
+    2005: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2006: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2007: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2008: [31,31,31,32,31,31,29,30,30,29,29,31],
+    2009: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2010: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2011: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2012: [31,31,31,32,31,31,29,30,30,29,30,30],
+    2013: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2014: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2015: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2016: [31,31,31,32,31,31,29,30,30,29,30,30],
+    2017: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2018: [31,32,31,32,31,30,30,29,30,29,30,30],
+    2019: [31,32,31,32,31,30,30,30,29,30,29,31],
+    2020: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2021: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2022: [31,32,31,32,31,30,30,30,29,29,30,30],
+    2023: [31,32,31,32,31,30,30,30,29,30,29,31],
+    2024: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2025: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2026: [31,32,31,32,31,30,30,30,29,29,30,30],
+    2027: [31,32,31,32,31,30,30,30,29,30,29,31],
+    2028: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2029: [31,31,32,31,32,30,30,29,30,29,30,30],
+    2030: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2031: [30,32,31,32,31,30,30,30,29,30,29,31],
+    2032: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2033: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2034: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2035: [30,32,31,32,31,31,29,30,30,29,29,31],
+    2036: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2037: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2038: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2039: [31,31,31,32,31,31,29,30,30,29,30,30],
+    2040: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2041: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2042: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2043: [31,31,31,32,31,31,29,30,30,29,30,30],
+    2044: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2045: [31,32,31,32,31,30,30,29,30,29,30,30],
+    2046: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2047: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2048: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2049: [31,32,31,32,31,30,30,30,29,29,30,30],
+    2050: [31,32,31,32,31,30,30,30,29,30,29,31],
+    2051: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2052: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2053: [31,32,31,32,31,30,30,30,29,29,30,30],
+    2054: [31,32,31,32,31,30,30,30,29,30,29,31],
+    2055: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2056: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2057: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2058: [30,32,31,32,31,30,30,30,29,30,29,31],
+    2059: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2060: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2061: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2062: [30,32,31,32,31,31,29,30,29,30,29,31],
+    2063: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2064: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2065: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2066: [31,31,31,32,31,31,29,30,30,29,29,31],
+    2067: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2068: [31,31,32,32,31,30,30,29,30,29,30,30],
+    2069: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2070: [31,31,31,32,31,31,29,30,30,29,30,30],
+    2071: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2072: [31,32,31,32,31,30,30,29,30,29,30,30],
+    2073: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2074: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2075: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2076: [31,32,31,32,31,30,30,29,30,29,30,30],
+    2077: [31,32,31,32,31,30,30,30,29,29,30,31],
+    2078: [31,31,31,32,31,31,30,29,30,29,30,30],
+    2079: [31,31,32,31,31,31,30,29,30,29,30,30],
+    2080: [31,32,31,32,31,30,30,30,29,29,30,30],
+    2081: [31,31,32,32,31,30,30,30,29,30,30,30],
+    2082: [30,32,31,32,31,30,30,30,29,30,30,30],
+    2083: [31,31,32,31,31,30,30,30,29,30,30,30],
+    2084: [31,31,32,31,31,30,30,30,29,30,30,30],
+    2085: [31,32,31,32,30,31,30,30,29,30,30,30],
+    2086: [30,32,31,32,31,30,30,30,29,30,30,30],
+    2087: [31,31,32,31,31,31,30,30,29,30,30,30],
+    2088: [30,31,32,32,30,31,30,30,29,30,30,30],
+    2089: [30,32,31,32,31,30,30,30,29,30,30,30],
+    2090: [30,32,31,32,31,30,30,30,29,30,30,30]
+  };
+
+  // Reference date: BS 2000/01/01 = AD 1943/04/14 (Wednesday)
+  const referenceBs = { year: 2000, month: 1, day: 1 };
+  const referenceAd = new Date(1943, 3, 14); // April 14, 1943
+
+  // Populate dropdowns
+  function populateDropdowns() {
+    const yearSelect = document.getElementById('bsYear');
+    const monthSelect = document.getElementById('bsMonth');
+    const daySelect = document.getElementById('bsDay');
+
+    // Years
+    for (let y = 2000; y <= 2090; y++) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+
+    // Months
+    nepaliMonths.forEach((m, i) => {
+      const opt = document.createElement('option');
+      opt.value = i + 1;
+      opt.textContent = m;
+      monthSelect.appendChild(opt);
+    });
+
+    updateDays();
+
+    // Default to current approximate BS date (June 23, 2026 ≈ BS 2083/03/something)
+    yearSelect.value = 2083;
+    monthSelect.value = 3;
+    updateDays();
+    daySelect.value = 9;
+  }
+
+  function updateDays() {
+    const year = parseInt(document.getElementById('bsYear').value);
+    const month = parseInt(document.getElementById('bsMonth').value);
+    const daySelect = document.getElementById('bsDay');
+    const currentDay = parseInt(daySelect.value) || 1;
+
+    const maxDays = bsCalendarData[year] ? bsCalendarData[year][month - 1] : 32;
+
+    daySelect.innerHTML = '';
+    for (let d = 1; d <= maxDays; d++) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      daySelect.appendChild(opt);
+    }
+    daySelect.value = Math.min(currentDay, maxDays);
+  }
+
+  // Convert BS to AD
+  function bsToAd(bsYear, bsMonth, bsDay) {
+    if (!bsCalendarData[bsYear]) return null;
+    if (bsMonth < 1 || bsMonth > 12) return null;
+    if (bsDay < 1 || bsDay > bsCalendarData[bsYear][bsMonth - 1]) return null;
+
+    // Calculate total days from reference BS date
+    let totalDays = 0;
+
+    // Add years
+    for (let y = referenceBs.year; y < bsYear; y++) {
+      if (!bsCalendarData[y]) return null;
+      for (let m = 0; m < 12; m++) {
+        totalDays += bsCalendarData[y][m];
+      }
+    }
+
+    // Add months in target year
+    for (let m = 0; m < bsMonth - 1; m++) {
+      totalDays += bsCalendarData[bsYear][m];
+    }
+
+    // Add days
+    totalDays += bsDay - referenceBs.day;
+
+    // Add to reference AD date
+    const adDate = new Date(referenceAd);
+    adDate.setDate(adDate.getDate() + totalDays);
+
+    return adDate;
+  }
+
+  function formatDate(date) {
+    const day = date.getDate();
+    const month = englishMonths[date.getMonth()];
+    const year = date.getFullYear();
+    return `${month} ${day}, ${year}`;
+  }
+
+  function showResult(success, label, value, day) {
+    const result = document.getElementById('result');
+    const resultLabel = document.getElementById('resultLabel');
+    const resultValue = document.getElementById('resultValue');
+    const resultDay = document.getElementById('resultDay');
+
+    result.classList.add('show');
+    result.classList.toggle('error', !success);
+
+    resultLabel.textContent = label;
+    resultValue.textContent = value;
+    resultDay.textContent = day || '';
+  }
+
+  function convert() {
+    const year = parseInt(document.getElementById('bsYear').value);
+    const month = parseInt(document.getElementById('bsMonth').value);
+    const day = parseInt(document.getElementById('bsDay').value);
+
+    const adDate = bsToAd(year, month, day);
+
+    if (adDate) {
+      const weekDay = weekDays[adDate.getDay()];
+      showResult(
+        true,
+        'English Date (AD)',
+        formatDate(adDate),
+        weekDay
+      );
+    } else {
+      showResult(
+        false,
+        'Error',
+        'Invalid Nepali date',
+        'Please check your selection and try again.'
+      );
+    }
+  }
+
+  // Event listeners
+  document.getElementById('bsYear').addEventListener('change', updateDays);
+  document.getElementById('bsMonth').addEventListener('change', updateDays);
+  document.getElementById('convertBtn').addEventListener('click', convert);
+
+  // Initialize
+  populateDropdowns();
+</script>
+</body>
+</html>
