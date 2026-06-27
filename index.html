@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nepali to English Date Converter</title>
+  <title>Nepali ⇄ English Date Converter</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.css">
@@ -12,33 +12,61 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>📅 Date Converter</h1>
-      <p>Nepali (Bikram Sambat) → English (Gregorian)</p>
+      <h1>Date Converter</h1>
+      <p>Nepali (Bikram Sambat) ⇄ English (Gregorian)</p>
     </div>
-    <div class="accent-bar"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-panel="bsToAdPanel">BS → AD</button>
+      <button class="tab" data-panel="adToBsPanel">AD → BS</button>
+    </div>
 
     <div class="content">
-      <div class="input-group">
-        <label>Nepali Date (BS)</label>
-        <div class="input-row">
-          <div class="input-field">
-            <select id="bsYear"></select>
+      <!-- BS to AD -->
+      <div class="panel active" id="bsToAdPanel">
+        <div class="input-group">
+          <div class="input-group-header">
+            <label>Nepali Date (BS)</label>
+            <button class="link-btn" id="todayBsBtn">Today</button>
           </div>
-          <div class="input-field">
-            <select id="bsMonth"></select>
-          </div>
-          <div class="input-field">
-            <select id="bsDay"></select>
+          <div class="input-row">
+            <div class="input-field">
+              <select id="bsYear"></select>
+            </div>
+            <div class="input-field">
+              <select id="bsMonth"></select>
+            </div>
+            <div class="input-field">
+              <select id="bsDay"></select>
+            </div>
           </div>
         </div>
+        <button class="btn-convert" id="convertBsBtn">Convert to English</button>
       </div>
 
-      <button class="btn-convert" id="convertBtn">Convert to English</button>
+      <!-- AD to BS -->
+      <div class="panel" id="adToBsPanel">
+        <div class="input-group">
+          <div class="input-group-header">
+            <label>English Date (AD)</label>
+            <button class="link-btn" id="todayAdBtn">Today</button>
+          </div>
+          <div class="input-field">
+            <input type="date" id="adDate">
+          </div>
+        </div>
+        <button class="btn-convert" id="convertAdBtn">Convert to Nepali</button>
+      </div>
 
       <div class="result" id="result">
-        <div class="result-label" id="resultLabel">English Date</div>
-        <div class="result-value" id="resultValue">—</div>
-        <div class="result-day" id="resultDay"></div>
+        <div class="result-top">
+          <div>
+            <div class="result-label" id="resultLabel">Result</div>
+            <div class="result-value" id="resultValue">—</div>
+            <div class="result-day" id="resultDay"></div>
+          </div>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
       </div>
     </div>
   </div>

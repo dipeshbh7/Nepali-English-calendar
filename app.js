@@ -107,25 +107,116 @@ const bsCalendarData = {
   2090: [30,32,31,32,31,30,30,30,29,30,30,30]
 };
 
+const MIN_BS_YEAR = 2000;
+const MAX_BS_YEAR = 2090;
+
 // Reference date: BS 2000/01/01 = AD 1943/04/14 (Wednesday)
 const referenceBs = { year: 2000, month: 1, day: 1 };
 const referenceAd = new Date(1943, 3, 14); // April 14, 1943
 
-// Populate dropdowns
-function populateDropdowns() {
+// Total days spanned by the supported BS range (used to bound AD->BS conversion)
+function totalDaysInRange() {
+  let total = 0;
+  for (let y = MIN_BS_YEAR; y <= MAX_BS_YEAR; y++) {
+    for (let m = 0; m < 12; m++) total += bsCalendarData[y][m];
+  }
+  return total;
+}
+
+const maxAdDate = (() => {
+  const d = new Date(referenceAd);
+  d.setDate(d.getDate() + totalDaysInRange() - 1);
+  return d;
+})();
+
+// ---------- BS -> AD ----------
+function bsToAd(bsYear, bsMonth, bsDay) {
+  if (!bsCalendarData[bsYear]) return null;
+  if (bsMonth < 1 || bsMonth > 12) return null;
+  if (bsDay < 1 || bsDay > bsCalendarData[bsYear][bsMonth - 1]) return null;
+
+  let totalDays = 0;
+  for (let y = referenceBs.year; y < bsYear; y++) {
+    for (let m = 0; m < 12; m++) totalDays += bsCalendarData[y][m];
+  }
+  for (let m = 0; m < bsMonth - 1; m++) totalDays += bsCalendarData[bsYear][m];
+  totalDays += bsDay - referenceBs.day;
+
+  const adDate = new Date(referenceAd);
+  adDate.setDate(adDate.getDate() + totalDays);
+  return adDate;
+}
+
+// ---------- AD -> BS ----------
+function adToBs(adDate) {
+  const target = new Date(adDate.getFullYear(), adDate.getMonth(), adDate.getDate());
+  if (target < referenceAd || target > maxAdDate) return null;
+
+  const dayDiff = Math.round((target - referenceAd) / 86400000);
+  let remaining = dayDiff;
+  let year = referenceBs.year;
+  let month = 0;
+
+  outer:
+  for (year = referenceBs.year; year <= MAX_BS_YEAR; year++) {
+    for (month = 0; month < 12; month++) {
+      const daysInMonth = bsCalendarData[year][month];
+      if (remaining < daysInMonth) break outer;
+      remaining -= daysInMonth;
+    }
+  }
+
+  return { year, month: month + 1, day: remaining + 1 };
+}
+
+function todayBs() {
+  return adToBs(new Date());
+}
+
+function formatAdDate(date) {
+  const day = date.getDate();
+  const month = englishMonths[date.getMonth()];
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
+}
+
+function formatBsDate(bs) {
+  return `${nepaliMonths[bs.month - 1]} ${bs.day}, ${bs.year}`;
+}
+
+function dateToInputValue(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// ---------- UI: tabs ----------
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+    hideResult();
+  });
+});
+
+// ---------- UI: BS -> AD panel ----------
+function populateBsDropdowns() {
   const yearSelect = document.getElementById('bsYear');
   const monthSelect = document.getElementById('bsMonth');
-  const daySelect = document.getElementById('bsDay');
 
-  // Years
-  for (let y = 2000; y <= 2090; y++) {
+  for (let y = MIN_BS_YEAR; y <= MAX_BS_YEAR; y++) {
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = y;
     yearSelect.appendChild(opt);
   }
 
-  // Months
   nepaliMonths.forEach((m, i) => {
     const opt = document.createElement('option');
     opt.value = i + 1;
@@ -133,16 +224,11 @@ function populateDropdowns() {
     monthSelect.appendChild(opt);
   });
 
-  updateDays();
-
-  // Default to current approximate BS date (June 23, 2026 ≈ BS 2083/03/something)
-  yearSelect.value = 2083;
-  monthSelect.value = 3;
-  updateDays();
-  daySelect.value = 9;
+  updateBsDays();
+  setBsToToday();
 }
 
-function updateDays() {
+function updateBsDays() {
   const year = parseInt(document.getElementById('bsYear').value);
   const month = parseInt(document.getElementById('bsMonth').value);
   const daySelect = document.getElementById('bsDay');
@@ -160,44 +246,56 @@ function updateDays() {
   daySelect.value = Math.min(currentDay, maxDays);
 }
 
-// Convert BS to AD
-function bsToAd(bsYear, bsMonth, bsDay) {
-  if (!bsCalendarData[bsYear]) return null;
-  if (bsMonth < 1 || bsMonth > 12) return null;
-  if (bsDay < 1 || bsDay > bsCalendarData[bsYear][bsMonth - 1]) return null;
-
-  // Calculate total days from reference BS date
-  let totalDays = 0;
-
-  // Add years
-  for (let y = referenceBs.year; y < bsYear; y++) {
-    if (!bsCalendarData[y]) return null;
-    for (let m = 0; m < 12; m++) {
-      totalDays += bsCalendarData[y][m];
-    }
-  }
-
-  // Add months in target year
-  for (let m = 0; m < bsMonth - 1; m++) {
-    totalDays += bsCalendarData[bsYear][m];
-  }
-
-  // Add days
-  totalDays += bsDay - referenceBs.day;
-
-  // Add to reference AD date
-  const adDate = new Date(referenceAd);
-  adDate.setDate(adDate.getDate() + totalDays);
-
-  return adDate;
+function setBsToToday() {
+  const bs = todayBs();
+  if (!bs) return;
+  document.getElementById('bsYear').value = bs.year;
+  document.getElementById('bsMonth').value = bs.month;
+  updateBsDays();
+  document.getElementById('bsDay').value = bs.day;
 }
 
-function formatDate(date) {
-  const day = date.getDate();
-  const month = englishMonths[date.getMonth()];
-  const year = date.getFullYear();
-  return `${month} ${day}, ${year}`;
+function convertBsToAd() {
+  const year = parseInt(document.getElementById('bsYear').value);
+  const month = parseInt(document.getElementById('bsMonth').value);
+  const day = parseInt(document.getElementById('bsDay').value);
+
+  const adDate = bsToAd(year, month, day);
+
+  if (adDate) {
+    showResult(true, 'English Date (AD)', formatAdDate(adDate), weekDays[adDate.getDay()]);
+  } else {
+    showResult(false, 'Error', 'Invalid Nepali date', 'Please check your selection and try again.');
+  }
 }
+
+// ---------- UI: AD -> BS panel ----------
+function populateAdPanel() {
+  const input = document.getElementById('adDate');
+  input.min = dateToInputValue(referenceAd);
+  input.max = dateToInputValue(maxAdDate);
+  input.value = dateToInputValue(new Date());
+}
+
+function convertAdToBs() {
+  const input = document.getElementById('adDate');
+  if (!input.value) {
+    showResult(false, 'Error', 'Please select a date', '');
+    return;
+  }
+  const [y, m, d] = input.value.split('-').map(Number);
+  const adDate = new Date(y, m - 1, d);
+  const bs = adToBs(adDate);
+
+  if (bs) {
+    showResult(true, 'Nepali Date (BS)', formatBsDate(bs), weekDays[adDate.getDay()]);
+  } else {
+    showResult(false, 'Error', 'Date out of supported range', `Supported: ${formatAdDate(referenceAd)} – ${formatAdDate(maxAdDate)}`);
+  }
+}
+
+// ---------- Result display ----------
+let lastResultText = '';
 
 function showResult(success, label, value, day) {
   const result = document.getElementById('result');
@@ -211,37 +309,46 @@ function showResult(success, label, value, day) {
   resultLabel.textContent = label;
   resultValue.textContent = value;
   resultDay.textContent = day || '';
+
+  lastResultText = success ? `${label}: ${value}${day ? ' (' + day + ')' : ''}` : '';
+  document.getElementById('copyBtn').classList.toggle('visible', success);
 }
 
-function convert() {
-  const year = parseInt(document.getElementById('bsYear').value);
-  const month = parseInt(document.getElementById('bsMonth').value);
-  const day = parseInt(document.getElementById('bsDay').value);
-
-  const adDate = bsToAd(year, month, day);
-
-  if (adDate) {
-    const weekDay = weekDays[adDate.getDay()];
-    showResult(
-      true,
-      'English Date (AD)',
-      formatDate(adDate),
-      weekDay
-    );
-  } else {
-    showResult(
-      false,
-      'Error',
-      'Invalid Nepali date',
-      'Please check your selection and try again.'
-    );
-  }
+function hideResult() {
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('copyBtn').classList.remove('visible');
 }
 
-// Event listeners
-document.getElementById('bsYear').addEventListener('change', updateDays);
-document.getElementById('bsMonth').addEventListener('change', updateDays);
-document.getElementById('convertBtn').addEventListener('click', convert);
+function copyResult() {
+  if (!lastResultText) return;
+  navigator.clipboard.writeText(lastResultText).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 
-// Initialize
-populateDropdowns();
+// ---------- Event listeners ----------
+document.getElementById('bsYear').addEventListener('change', updateBsDays);
+document.getElementById('bsMonth').addEventListener('change', updateBsDays);
+document.getElementById('convertBsBtn').addEventListener('click', convertBsToAd);
+document.getElementById('todayBsBtn').addEventListener('click', setBsToToday);
+
+document.getElementById('convertAdBtn').addEventListener('click', convertAdToBs);
+document.getElementById('todayAdBtn').addEventListener('click', () => {
+  document.getElementById('adDate').value = dateToInputValue(new Date());
+});
+
+document.getElementById('copyBtn').addEventListener('click', copyResult);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const activePanel = document.querySelector('.panel.active').id;
+  if (activePanel === 'bsToAdPanel') convertBsToAd();
+  else convertAdToBs();
+});
+
+// ---------- Initialize ----------
+populateBsDropdowns();
+populateAdPanel();
